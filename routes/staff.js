@@ -1,32 +1,29 @@
 const express = require('express');
 const router = express.Router();
 
-var data = {
-    "foil": {
-        "name": "foil",
-        "dob": "01/01/1998",
-        "imageurl": "/images/foilimage1.png",
-        "hobbies": ["Jokes", "Gags", "Stand up"]
-    },
+const { readStaff } = require('../models/staff');
 
-    "arms": {
-        "name": "arms",
-        "dob": "03/05/1995",
-        "imageurl": "/images/armsimage1.png"
-    },
-
-    "hog": {
-        "name": "hog",
-        "imageurl": "/images/hogimage1.png"
-    }
-}
-
-router.get('/:name', (req, res) => {
+router.get('/:name', async(req, res) => {
     var name = req.params.name;
-    res.render('person', { person: data[name] })
+
+    const person = await readStaff({ 'name': name })
+
+    if (!person) {
+        console.log('404 because person doesn\'t exist');
+        res.render('404');
+    } else {
+        res.render('person', { person: person });
+    }
 })
+
 router.get('/', (req, res) => {
     res.render('listing')
+})
+router.get('/', async(req, res) => {
+    const staff = await readStaff();
+
+    res.render('listing', { personlist: staff })
+
 })
 
 module.exports = router;
